@@ -1,75 +1,65 @@
 @echo off
 chcp 65001 >nul
 setlocal enabledelayedexpansion
-title blickfang — Kommunikation
+title blickfang — Sprachcomputer
 color 0F
 
 echo ╔══════════════════════════════════════════════════════════╗
-echo ║          blickfang — Kommunikation starten              ║
-echo ║   JA / NEIN / PASSE                                    ║
+echo ║          blickfang — Sprachcomputer                     ║
+echo ║   Phrasen · Buchstabieren · Ja/Nein · Notruf           ║
 echo ╚══════════════════════════════════════════════════════════╝
 echo.
+echo Die Kommunikations-Oberfläche öffnet sich im Browser.
+echo.
+echo ──────────────────────────────────────────────────────────
+echo.
+echo Steuerung:
+echo   [1] Nur Tastatur (Leertaste = Signal) — zum Testen
+echo   [2] Mit Kamera (Profil einer Person laden)
+echo.
+set /p MODUS="Auswahl (1/2): "
 
-:: Prüfe ob Profile vorhanden sind
-set PROFILE_COUNT=0
-for %%F in (config\profiles\*.yaml) do set /a PROFILE_COUNT+=1
+echo.
+echo Scan-Geschwindigkeit (Sekunden pro Schritt):
+echo   Standard: 1.5 — Langsamer = sicherer, Schneller = effizienter
+set /p SPEED="Geschwindigkeit [1.5]: "
+if "%SPEED%"=="" set SPEED=1.5
 
-if %PROFILE_COUNT%==0 (
-    echo [!] Noch kein Profil vorhanden.
+if "%MODUS%"=="2" (
     echo.
-    echo Optionen:
-    echo   [1] Kalibrierung starten (empfohlen)
-    echo   [2] Nur mit Tastatur testen (ohne Kamera)
-    echo.
-    set /p WAHL="Auswahl (1/2): "
-    
-    if "!WAHL!"=="2" (
-        echo.
-        echo Starte im Tastatur-Modus...
-        echo Leertaste = Signal auslösen
-        echo.
-        blickfang-run --key-only
-        goto :end
+    echo Verfügbare Profile:
+    if exist config\profiles\*.yaml (
+        for %%F in (config\profiles\*.yaml) do echo   %%~nF
     ) else (
-        echo.
-        echo Starte Kalibrierung...
-        blickfang-calibrate
+        echo   (keine Profile gefunden — bitte erst KALIBRIEREN.bat ausführen)
     )
-)
-
-:: Zeige verfügbare Profile
-echo Verfügbare Profile:
-echo ──────────────────────────────────────────────────────────
-echo.
-
-set IDX=0
-for %%F in (config\profiles\*.yaml) do (
-    set /a IDX+=1
-    echo   %%~nF
-)
-
-echo.
-set /p PERSON="Name der Person (oder Enter für neuestes Profil): "
-
-echo.
-echo ──────────────────────────────────────────────────────────
-echo Starte Kommunikation...
-echo.
-echo   Signal geben = JA / NEIN / PASSE wird gescannt
-echo   Sprachausgabe bestätigt die Auswahl
-echo   Jede Auswahl ist abbrechbar (2.5s Countdown)
-echo.
-echo   Fenster schließen oder Strg+C = Beenden
-echo ──────────────────────────────────────────────────────────
-echo.
-
-if "%PERSON%"=="" (
-    blickfang-run
+    echo.
+    set /p PERSON="Name der Person: "
+    echo.
+    echo ──────────────────────────────────────────────────────────
+    echo Starte Server mit Kamera-Erkennung...
+    echo Browser öffnet sich automatisch auf http://localhost:8000
+    echo.
+    echo   Im Browser: Leertaste/Enter = Signal
+    echo   F11 = Vollbild (empfohlen!)
+    echo   Hier: Strg+C = Server beenden
+    echo ──────────────────────────────────────────────────────────
+    echo.
+    blickfang-server --person !PERSON! --camera --speed %SPEED%
 ) else (
-    blickfang-run --person %PERSON%
+    echo.
+    echo ──────────────────────────────────────────────────────────
+    echo Starte Server im Tastatur-Modus...
+    echo Browser öffnet sich automatisch auf http://localhost:8000
+    echo.
+    echo   Im Browser: Leertaste/Enter = Signal
+    echo   F11 = Vollbild (empfohlen!)
+    echo   Hier: Strg+C = Server beenden
+    echo ──────────────────────────────────────────────────────────
+    echo.
+    blickfang-server --key-only --speed %SPEED%
 )
 
-:end
 echo.
-echo [Beendet]
+echo [Server beendet]
 pause

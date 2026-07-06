@@ -59,7 +59,7 @@ if errorlevel 1 (
     )
     
     echo.
-    echo Installiere Abhängigkeiten...
+    echo Installiere Python-Abhängigkeiten...
     cd /d "%~dp0"
     pip install -e ".[dev]"
 )
@@ -71,6 +71,29 @@ if errorlevel 1 (
     exit /b 1
 )
 
+:: Frontend-Build prüfen
+echo.
+echo Prüfe Frontend...
+if exist "%~dp0frontend\dist\index.html" (
+    echo [✓] Frontend bereits gebaut.
+) else (
+    echo [INFO] Frontend muss gebaut werden.
+    node --version >nul 2>&1
+    if errorlevel 1 (
+        echo.
+        echo [HINWEIS] Node.js nicht gefunden.
+        echo Das Frontend wird beim nächsten Update mitgeliefert.
+        echo Oder installiere Node.js von https://nodejs.org
+    ) else (
+        echo Baue Frontend (React + Vite)...
+        cd /d "%~dp0frontend"
+        call npm install
+        call npm run build
+        cd /d "%~dp0"
+        echo [✓] Frontend gebaut.
+    )
+)
+
 echo.
 echo ╔══════════════════════════════════════════════════════════╗
 echo ║  [✓] Installation erfolgreich!                          ║
@@ -78,9 +101,10 @@ echo ╠════════════════════════
 echo ║                                                          ║
 echo ║  Nächste Schritte:                                       ║
 echo ║    1. Doppelklick auf SELFTEST.bat (prüft alles)         ║
-echo ║    2. Doppelklick auf AUFNEHMEN.bat (Videos aufnehmen)   ║
-echo ║    3. Doppelklick auf KALIBRIEREN.bat (Kalibrierung)     ║
-echo ║    4. Doppelklick auf START.bat (Kommunikation)          ║
+echo ║    2. Doppelklick auf START.bat (Kommunikation starten)  ║
+echo ║                                                          ║
+echo ║  Die Oberfläche öffnet sich im Browser (localhost:8000)  ║
+echo ║  Leertaste = Signal | F11 = Vollbild                     ║
 echo ║                                                          ║
 echo ╚══════════════════════════════════════════════════════════╝
 echo.

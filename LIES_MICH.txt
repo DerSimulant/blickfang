@@ -1,53 +1,98 @@
-═══════════════════════════════════════════════════════════════
-                    blickfang — Schnellstart
-    Kommunikationshilfe für Menschen mit schwerer Behinderung
-═══════════════════════════════════════════════════════════════
+╔══════════════════════════════════════════════════════════════╗
+║                    blickfang                                  ║
+║     Sprachcomputer durch Mimik-Erkennung                     ║
+╚══════════════════════════════════════════════════════════════╝
 
-VORAUSSETZUNGEN:
+KURZANLEITUNG
+═════════════
+
+  1. INSTALL.bat        → Einmalig: Installiert alles
+  2. START.bat          → Startet den Sprachcomputer
+                          (Browser öffnet sich automatisch)
+  3. Im Browser:
+     - Leertaste/Enter  = Signal geben
+     - F11              = Vollbild (empfohlen!)
+     - Die Optionen werden nacheinander hervorgehoben
+     - Bei Signal wird die aktuelle Option gewählt
+
+VORAUSSETZUNGEN
+═══════════════
+
   • Windows 10/11
   • Python 3.10+ (https://www.python.org/downloads/)
     → Bei Installation "Add Python to PATH" ankreuzen!
-  • Webcam (USB oder eingebaut)
+  • Webcam (USB oder eingebaut) — für Kamera-Modus
   • Lautsprecher (für Sprachausgabe)
+  • Browser (Chrome/Edge empfohlen)
 
-───────────────────────────────────────────────────────────────
-REIHENFOLGE (Doppelklick auf die BAT-Dateien):
-───────────────────────────────────────────────────────────────
+KOMMUNIKATIONS-MODI
+════════════════════
 
-  1. INSTALL.bat        Einmalig: Installiert alles automatisch
-  
-  2. SELFTEST.bat       Prüft ob alles funktioniert
-  
-  3. AUFNEHMEN.bat      Videos der Person aufnehmen
-                        (Signal, Ruhe, Unruhe — je nach Situation)
-  
-  4. ANNOTIEREN.bat     (Optional) Aufnahmen mit Labels versehen
-  
-  5. KALIBRIEREN.bat    Findet das beste Signal der Person
-  
-  6. START.bat          ★ KOMMUNIKATION STARTEN ★
-                        (JA / NEIN / PASSE mit Sprachausgabe)
+  HAUPTMENÜ
+    ├── Schnell-Phrasen  (36 vorgefertigte Sätze)
+    │     Bedürfnisse, Schmerzen, Lage, Soziales, Hilfe
+    │
+    ├── Buchstabieren   (Frequenz-optimiertes Layout)
+    │     Mit Wortvorschlägen (500+ deutsche Wörter)
+    │
+    ├── Ja / Nein / Passe
+    │     Für direkte Fragen
+    │
+    └── HILFE!          (Notruf-Alarm)
+          3× schnelles Signal = Alarm aus jedem Modus
 
-───────────────────────────────────────────────────────────────
-WEITERE DATEIEN:
-───────────────────────────────────────────────────────────────
+SCANNING-PRINZIP
+════════════════
 
-  VALIDIEREN.bat        Prüft wie gut das Profil funktioniert
-  UPDATE.bat            Aktualisiert auf neueste Version
+  1. ZEILEN werden nacheinander hervorgehoben (gelb)
+  2. Signal → Zeile wird fixiert
+  3. SPALTEN werden einzeln hervorgehoben
+  4. Signal → Item wird ausgewählt
+  5. 2,5 Sekunden CANCEL-COUNTDOWN
+     (nochmal Signal = Abbruch → Sicherheit!)
+  6. Sprachausgabe bestätigt die Auswahl
 
-───────────────────────────────────────────────────────────────
-TIPPS:
-───────────────────────────────────────────────────────────────
+ALLE BAT-DATEIEN
+════════════════
 
-  • Für den ersten Test: START.bat → Option "Nur mit Tastatur"
+  INSTALL.bat       Erstinstallation
+  SELFTEST.bat      Prüft ob alles funktioniert
+  START.bat         ★ Kommunikation starten (Hauptprogramm)
+  KALIBRIEREN.bat   Kalibrierung mit der Person
+  AUFNEHMEN.bat     Videos aufnehmen
+  ANNOTIEREN.bat    Aufnahmen annotieren
+  VALIDIEREN.bat    Detektor-Qualität prüfen
+  UPDATE.bat        Neueste Version holen
+
+TIPPS
+═════
+
+  • Für den ersten Test: START.bat → Option 1 "Nur mit Tastatur"
     (funktioniert ohne Kamera, Leertaste = Signal)
-    
-  • Aufnahmen werden im Ordner "recordings/" gespeichert
-  
-  • Profile werden im Ordner "config/profiles/" gespeichert
-  
+
+  • F11 im Browser = Vollbild (empfohlen für den Patienten!)
+
+  • Scan-Geschwindigkeit ist einstellbar beim Start
+    Langsamer = sicherer, Schneller = effizienter
+
   • Bei Problemen: SELFTEST.bat zeigt was fehlt
 
   • Für Updates: UPDATE.bat oder INSTALL.bat erneut ausführen
 
+ARCHITEKTUR
+═══════════
+
+  Python-Server (localhost:8000)
+    ├── Kamera + Gesichtserkennung (MediaPipe)
+    ├── Detektor (Schmitt-Trigger)
+    ├── Scanning-Engine + TTS
+    └── WebSocket → Browser
+
+  React-Frontend (im Browser)
+    ├── Scanning-Raster (große Buttons, Animationen)
+    ├── Text-Anzeige + Wortvorschläge
+    └── Empfängt Signale per WebSocket
+
+═══════════════════════════════════════════════════════════════
+  Repository: https://github.com/DerSimulant/blickfang
 ═══════════════════════════════════════════════════════════════
