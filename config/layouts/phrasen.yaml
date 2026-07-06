@@ -1,0 +1,68 @@
+# Schnell-Phrasen und Kategorien für die Kommunikation
+#
+# Hierarchisches Scanning: Kategorie → Phrase
+# Jede Phrase wird bei Auswahl direkt vorgelesen.
+
+name: "Schnell-Phrasen"
+description: "Häufige Sätze nach Kategorien"
+language: "de"
+
+scan_speed_s: 2.0
+max_cycles: 3
+cancel_countdown_s: 2.5
+speak_on_highlight: true
+
+rows:
+  - label: "Grundbedürfnisse"
+    items:
+      - {label: "Ich habe Durst", speak: "Ich habe Durst"}
+      - {label: "Ich habe Hunger", speak: "Ich habe Hunger"}
+      - {label: "Ich muss auf Toilette", speak: "Ich muss auf die Toilette"}
+      - {label: "Mir ist kalt", speak: "Mir ist kalt"}
+      - {label: "Mir ist warm", speak: "Mir ist zu warm"}
+      - {label: "Ich bin müde", speak: "Ich bin müde"}
+
+  - label: "Schmerzen"
+    items:
+      - {label: "Ich habe Schmerzen", speak: "Ich habe Schmerzen"}
+      - {label: "Kopf", speak: "Ich habe Kopfschmerzen"}
+      - {label: "Bauch", speak: "Ich habe Bauchschmerzen"}
+      - {label: "Rücken", speak: "Ich habe Rückenschmerzen"}
+      - {label: "Beine", speak: "Meine Beine tun weh"}
+      - {label: "Überall", speak: "Mir tut alles weh"}
+
+  - label: "Lage verändern"
+    items:
+      - {label: "Bitte umlagern", speak: "Bitte lagert mich um"}
+      - {label: "Kopf höher", speak: "Bitte den Kopf höher"}
+      - {label: "Kopf tiefer", speak: "Bitte den Kopf tiefer"}
+      - {label: "Auf die Seite", speak: "Bitte auf die Seite drehen"}
+      - {label: "Decke richten", speak: "Bitte die Decke richten"}
+      - {label: "Kissen richten", speak: "Bitte das Kissen richten"}
+
+  - label: "Soziales"
+    items:
+      - {label: "Ja", speak: "Ja"}
+      - {label: "Nein", speak: "Nein"}
+      - {label: "Danke", speak: "Danke"}
+      - {label: "Bitte", speak: "Bitte"}
+      - {label: "Ich liebe dich", speak: "Ich liebe dich"}
+      - {label: "Guten Morgen", speak: "Guten Morgen"}
+
+  - label: "Kommunikation"
+    items:
+      - {label: "Ich will etwas sagen", speak: "Ich möchte etwas sagen"}
+      - {label: "Bitte warten", speak: "Bitte wartet kurz"}
+      - {label: "Nochmal bitte", speak: "Bitte nochmal"}
+      - {label: "Ich verstehe nicht", speak: "Ich verstehe nicht"}
+      - {label: "Buchstabieren", speak: "Ich möchte buchstabieren", action: "keyboard"}
+      - {label: "Frage stellen", speak: "Ich habe eine Frage"}
+
+  - label: "Hilfe & Notruf"
+    items:
+      - {label: "Hilfe!", speak: "Hilfe! Ich brauche Hilfe!", action: "alarm"}
+      - {label: "Arzt rufen", speak: "Bitte ruft einen Arzt"}
+      - {label: "Pflege rufen", speak: "Bitte ruft die Pflege"}
+      - {label: "Ich habe Angst", speak: "Ich habe Angst"}
+      - {label: "Es ist dringend", speak: "Es ist dringend"}
+      - {label: "Hauptmenü", speak: "Hauptmenü", action: "home"}

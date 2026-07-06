@@ -1,0 +1,73 @@
+# Deutsches Frequenz-Layout für Zeilen-Spalten-Scanning
+#
+# Buchstaben sind nach Häufigkeit im Deutschen angeordnet:
+# E N I S R A T D H U L C G M O B W F K Z P V J Y X Q
+#
+# Die häufigsten Buchstaben stehen oben-links (schnellster Zugang).
+# Sonderzeichen und Aktionen in der letzten Zeile.
+
+name: "Deutsch (Frequenz-optimiert)"
+description: "Buchstaben nach Häufigkeit im Deutschen sortiert"
+language: "de"
+
+# Scan-Einstellungen
+scan_speed_s: 1.5
+max_cycles: 3
+cancel_countdown_s: 2.5
+speak_on_highlight: true
+
+# Layout als Zeilen (Zeile → Spalte Scanning)
+rows:
+  - label: "E N I S R A"
+    items:
+      - {label: "E", value: "e"}
+      - {label: "N", value: "n"}
+      - {label: "I", value: "i"}
+      - {label: "S", value: "s"}
+      - {label: "R", value: "r"}
+      - {label: "A", value: "a"}
+
+  - label: "T D H U L C"
+    items:
+      - {label: "T", value: "t"}
+      - {label: "D", value: "d"}
+      - {label: "H", value: "h"}
+      - {label: "U", value: "u"}
+      - {label: "L", value: "l"}
+      - {label: "C", value: "c"}
+
+  - label: "G M O B W F"
+    items:
+      - {label: "G", value: "g"}
+      - {label: "M", value: "m"}
+      - {label: "O", value: "o"}
+      - {label: "B", value: "b"}
+      - {label: "W", value: "w"}
+      - {label: "F", value: "f"}
+
+  - label: "K Z P V Ä Ö"
+    items:
+      - {label: "K", value: "k"}
+      - {label: "Z", value: "z"}
+      - {label: "P", value: "p"}
+      - {label: "V", value: "v"}
+      - {label: "Ä", value: "ä"}
+      - {label: "Ö", value: "ö"}
+
+  - label: "Ü J Y X Q ß"
+    items:
+      - {label: "Ü", value: "ü"}
+      - {label: "J", value: "j"}
+      - {label: "Y", value: "y"}
+      - {label: "X", value: "x"}
+      - {label: "Q", value: "q"}
+      - {label: "ß", value: "ß"}
+
+  - label: "Aktionen"
+    items:
+      - {label: "␣", value: " ", speak: "Leerzeichen", action: "space"}
+      - {label: "⌫", value: "", speak: "Löschen", action: "backspace"}
+      - {label: "🔊", value: "", speak: "Vorlesen", action: "speak"}
+      - {label: "⌧", value: "", speak: "Alles löschen", action: "clear"}
+      - {label: "⏎", value: "", speak: "Fertig", action: "done"}
+      - {label: "🏠", value: "", speak: "Hauptmenü", action: "home"}
