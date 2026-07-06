@@ -23,6 +23,7 @@ except ImportError:
     HAS_MEDIAPIPE = False
 
 from blickfang.core.config import FeaturesConfig
+from blickfang.core.model_manager import get_model_path
 
 logger = logging.getLogger(__name__)
 
@@ -81,28 +82,8 @@ class FaceMeshExtractor:
         self._landmarker = mp_vision.FaceLandmarker.create_from_options(options)
 
     def _find_model_asset(self) -> Path:
-        """Sucht das MediaPipe-Modell."""
-        # Prüfe verschiedene Pfade
-        candidates = [
-            Path(self._config.model_asset),
-            Path(__file__).parent / self._config.model_asset,
-            Path.home() / ".blickfang" / self._config.model_asset,
-            Path("/usr/share/blickfang") / self._config.model_asset,
-        ]
-
-        for p in candidates:
-            if p.exists():
-                return p
-
-        # Versuche Download-Hinweis
-        logger.warning(
-            f"MediaPipe-Modell nicht gefunden: {self._config.model_asset}. "
-            f"Bitte herunterladen von: "
-            f"https://storage.googleapis.com/mediapipe-models/face_landmarker/"
-            f"face_landmarker/float16/latest/face_landmarker.task"
-        )
-        # Gib den konfigurierten Pfad zurück — MediaPipe gibt dann einen klaren Fehler
-        return Path(self._config.model_asset)
+        """Sucht das MediaPipe-Modell. Lädt es automatisch herunter wenn nötig."""
+        return get_model_path(self._config.model_asset)
 
     def process_frame(
         self, frame: np.ndarray, timestamp_ms: int

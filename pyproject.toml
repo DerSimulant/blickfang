@@ -33,6 +33,10 @@ piper = [
 [project.scripts]
 blickfang-calibrate = "blickfang.app.calibrate:main"
 blickfang-run = "blickfang.app.run_yesno:main"
+blickfang-record = "blickfang.app.record:main"
+blickfang-annotate = "blickfang.app.annotate:main"
+blickfang-validate = "blickfang.app.validate:main"
+blickfang-selftest = "blickfang.app.selftest:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blickfang"]

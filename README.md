@@ -3,9 +3,9 @@
 **Signaloffene Webcam-Kommunikation für Menschen mit schwerer motorischer Einschränkung**
 (ALS, Locked-in-Syndrom, Chorea Huntington, hohe Querschnittslähmung u.ä.)
 
-> **Status: Meilenstein M1 — Implementierung.**
-> Der Kalibrier- & Erkennungs-Kern ist implementiert. Alle Anforderungen und das
-> Umsetzungskonzept sind in [LASTENHEFT.md](LASTENHEFT.md) definiert.
+> **Status: Meilenstein M1 — Voll funktionsfähig.**
+> Kalibrier- & Erkennungs-Kern implementiert inkl. Aufnahme-, Annotations-
+> und Validierungs-Tools. Alle Anforderungen: [LASTENHEFT.md](LASTENHEFT.md).
 
 ## Idee in drei Sätzen
 
@@ -46,34 +46,162 @@ cd blickfang
 # Abhängigkeiten installieren
 pip install -e ".[dev]"
 
-# MediaPipe-Modell herunterladen
-wget -O face_landmarker_v2_with_blendshapes.task \
-  https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task
+# Selbsttest durchführen (prüft alles, lädt Modell automatisch herunter)
+blickfang-selftest
 
-# Konfiguration erstellen
+# Konfiguration erstellen (optional — Standardwerte funktionieren)
 cp config/settings.example.yaml config/settings.yaml
 ```
 
-### Verwendung
+Das MediaPipe-Modell wird beim ersten Start **automatisch heruntergeladen** (~4 MB).
+
+## Workflow
+
+### Schnellstart (3 Schritte)
 
 ```bash
-# Kalibrierung durchführen
+# 1. Selbsttest
+blickfang-selftest
+
+# 2. Kalibrierung (mit der Person)
 blickfang-calibrate
 
-# Ja/Nein/PASSE-Kommunikation starten
-blickfang-run --person <name>
-
-# Nur mit Tastatur-Schalter (ohne Kamera, zum Testen)
-blickfang-run --key-only
+# 3. Kommunikation starten
+blickfang-run --person <Name>
 ```
 
-### Tests
+### Vollständiger Workflow (mit Aufnahme & Validierung)
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  1. AUFNEHMEN   │────▶│  2. ANNOTIEREN   │────▶│  3. VALIDIEREN   │
+│  blickfang-     │     │  blickfang-      │     │  blickfang-      │
+│  record         │     │  annotate        │     │  validate        │
+└─────────────────┘     └──────────────────┘     └──────────────────┘
+        │                                                 │
+        ▼                                                 ▼
+┌─────────────────┐                              ┌──────────────────┐
+│  4. KALIBRIEREN │                              │  Schwellwert     │
+│  blickfang-     │◀─────────────────────────────│  optimieren      │
+│  calibrate      │                              └──────────────────┘
+└─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│  5. KOMMUNIZIEREN│
+│  blickfang-run  │
+└─────────────────┘
+```
+
+### Schritt 1: Videos aufnehmen (`blickfang-record`)
+
+Nimmt Rohvideos und Feature-Streams auf. Jede Aufnahme bekommt ein **Label**
+zur Kategorisierung:
 
 ```bash
-pytest tests/ -v
+# Signal-Aufnahme: Person erzeugt bewusst ihr Signal
+blickfang-record --person Anna --label signal --duration 60
+
+# Ruhe-Aufnahme: Person ruht (inkl. unwillkürlicher Bewegungen)
+blickfang-record --person Anna --label ruhe --duration 180
+
+# Unruhe-Aufnahme: Chorea/Tremor-Phase
+blickfang-record --person Anna --label unruhe --duration 120
+
+# Ohne Video (nur Feature-Stream, spart Speicher)
+blickfang-record --person Anna --label signal --no-video
 ```
 
-## Architektur (M1)
+**Ausgabe:** Ein Verzeichnis pro Aufnahme mit:
+- `features.jsonl` — Feature-Stream (für Replay & Validierung)
+- `video.avi` — Rohvideo (optional, für visuelle Kontrolle)
+- `meta.yaml` — Aufnahme-Metadaten
+- `annotations.yaml` — Annotations-Datei (zunächst leer)
+
+### Schritt 2: Annotieren (`blickfang-annotate`)
+
+Markiert Zeitabschnitte in den Aufnahmen mit Labels:
+
+```bash
+blickfang-annotate recordings/Anna_20260706_120000_signal/
+blickfang-annotate recordings/Anna_20260706_120000_signal/ --channel ear_left
+```
+
+**Tasten in der UI:**
+| Taste | Funktion |
+|-------|----------|
+| S | Signal-Segment markieren (Start/Ende) |
+| R | Ruhe-Segment markieren |
+| U | Unruhe-Segment markieren |
+| A | Artefakt markieren |
+| Leertaste | Play/Pause |
+| ← → | Vor/Zurück (1s) |
+| Strg+Z | Rückgängig |
+| Strg+S | Speichern |
+| ESC | Beenden (speichert automatisch) |
+
+### Schritt 3: Validieren (`blickfang-validate`)
+
+Lässt den Detektor gegen annotierte Aufnahmen laufen:
+
+```bash
+# Standard-Validierung
+blickfang-validate --profile config/profiles/Anna_v3.yaml --sessions recordings/
+
+# Schwellwert-Sweep (findet optimalen Schwellwert)
+blickfang-validate --profile config/profiles/Anna_v3.yaml --sessions recordings/ --sweep
+
+# Ergebnisse speichern
+blickfang-validate --profile config/profiles/Anna_v3.yaml --sessions recordings/ --output results.yaml
+```
+
+**Ausgabe:**
+```
+  ✓ Anna_20260706_signal1  TP: 90% (9/10) FP: 0.33/min Latenz: 0.42s
+  ✓ Anna_20260706_signal2  TP: 80% (8/10) FP: 0.50/min Latenz: 0.38s
+  ─────────────────────────────────────────────────────────
+  GESAMT:
+    Signale: 17/20 erkannt (85%)
+    Fehlauslösungen: 3 (0.41/min)
+    Mittlere Latenz: 0.40s
+
+  ★★☆ GUT — Profil ist brauchbar
+```
+
+### Schritt 4: Kalibrieren (`blickfang-calibrate`)
+
+Interaktive Kalibrierung mit der Person:
+
+```bash
+blickfang-calibrate
+blickfang-calibrate --config config/settings.yaml
+```
+
+### Schritt 5: Kommunizieren (`blickfang-run`)
+
+```bash
+# Mit kalibriertem Profil
+blickfang-run --person Anna
+
+# Nur mit Tastatur (zum Testen ohne Kamera)
+blickfang-run --key-only
+
+# Mit bestimmtem Profil
+blickfang-run --profile config/profiles/Anna_20260706_v3.yaml
+```
+
+## Alle Befehle
+
+| Befehl | Funktion |
+|--------|----------|
+| `blickfang-selftest` | Prüft Installation, Kamera, TTS, lädt Modell |
+| `blickfang-record` | Nimmt Videos + Feature-Streams auf |
+| `blickfang-annotate` | Annotiert Aufnahmen (Signal/Ruhe/Unruhe) |
+| `blickfang-validate` | Testet Detektor gegen annotierte Aufnahmen |
+| `blickfang-calibrate` | Interaktive Kalibrierung mit Person |
+| `blickfang-run` | Startet Ja/Nein/PASSE-Kommunikation |
+
+## Architektur
 
 ```
 blickfang/
@@ -81,48 +209,57 @@ blickfang/
   config/
     settings.example.yaml     # Fragen/Ansagen, Muster, Zeiten
     profiles/                 # versionierte Personen-Profile (YAML)
+  recordings/                 # Aufnahmen (von blickfang-record)
   src/blickfang/
-    core/events.py            # ChannelFrame + SwitchEvent
-    core/config.py            # YAML-Konfigurationsmanagement
+    core/
+      events.py               # ChannelFrame + SwitchEvent
+      config.py               # YAML-Konfigurationsmanagement
+      model_manager.py        # Automatischer Modell-Download
     capture/camera.py         # OpenCV, Backend-Wahl, Frame-Slot
-    features/face_mesh.py     # MediaPipe-Wrapper (VIDEO-Modus)
-    features/channels.py      # Blendshapes + Geometrie → Kanäle
-    calibration/session.py    # selbst getaktete Aufnahme, Peaks
-    calibration/selector.py   # FP@TP-Ranking, Degenerations-Check
-    calibration/profile.py    # versionierte Profile, Schnell-Trim
-    detection/baseline.py     # gated Dual-Timescale Median/MAD
-    detection/detector.py     # Schmitt-Trigger-Automat
-    detection/quality.py      # Liveness, Lichtsprung-Veto, FPS-Test
-    switch/base.py            # Switch-Schnittstelle
-    switch/video_switch.py    # Detektor-gestützt (Person A)
-    switch/key_switch.py      # Tastatur/physischer Schalter (B)
+    features/
+      face_mesh.py            # MediaPipe-Wrapper (VIDEO-Modus)
+      channels.py             # Blendshapes + Geometrie → Kanäle
+    calibration/
+      session.py              # selbst getaktete Aufnahme, Peaks
+      selector.py             # FP@TP-Ranking, Degenerations-Check
+      profile.py              # versionierte Profile, Schnell-Trim
+    detection/
+      baseline.py             # gated Dual-Timescale Median/MAD
+      detector.py             # Schmitt-Trigger-Automat (+ HOLD)
+      quality.py              # Liveness, Lichtsprung-Veto, FPS-Test
+    switch/
+      base.py                 # Switch-Schnittstelle
+      video_switch.py         # Detektor-gestützt (Person A)
+      key_switch.py           # Tastatur/physischer Schalter (B)
     temporal/patterns.py      # 1×/2×/halten, Debouncing
     io/replay.py              # Log=Replay-Format, deterministisch
-    output/tts.py             # pyttsx3, eigener Thread
-    output/scanning.py        # 3-Item-Scan, Cancel, KEINE ANTWORT
+    output/
+      tts.py                  # pyttsx3, eigener Thread
+      scanning.py             # 3-Item-Scan, Cancel, KEINE ANTWORT
     ui/scan_ui.py             # Tkinter: Scan-UI + Live-Monitor
-    app/calibrate.py          # Entrypoint Kalibrierung
-    app/run_yesno.py          # Entrypoint Ja/Nein/PASSE
-  tests/                      # synthetische Traces, Replay-Regression
+    app/
+      selftest.py             # Installations-Check
+      record.py               # Aufnahme-Tool
+      annotate.py             # Annotations-Tool
+      validate.py             # Batch-Validierung
+      calibrate.py            # Kalibrierung
+      run_yesno.py            # Ja/Nein/PASSE-Kommunikation
+  tests/                      # 35 Tests (synthetisch + Tools)
 ```
 
-## Implementierte Anforderungen (M1)
+## Tests
 
-| Anforderung | Status | Modul |
-|---|---|---|
-| /LF100/–/LF120/ Capture & Kamera-Setup | ✓ | `capture/camera.py` |
-| /LF130/ Lichtsprung-Veto | ✓ | `detection/quality.py` |
-| /LF140/ Liveness-Monitor | ✓ | `detection/quality.py` |
-| /LF150/ Selbsttest (AVX, FPS) | ✓ | `detection/quality.py` |
-| /LF200/–/LF230/ Feature-Extraktion | ✓ | `features/face_mesh.py`, `features/channels.py` |
-| /LF300/–/LF380/ Kalibrierung | ✓ | `calibration/` |
-| /LF400/–/LF430/ Detektion | ✓ | `detection/baseline.py`, `detection/detector.py` |
-| /LF500/–/LF530/ Virtueller Schalter | ✓ | `switch/`, `temporal/patterns.py` |
-| /LF600/–/LF630/ Output (Ja/Nein/PASSE, TTS) | ✓ | `output/scanning.py`, `output/tts.py` |
-| /LF700/–/LF710/ Live-Monitor & FP-Anzeige | ✓ | `ui/scan_ui.py` |
-| /LF730/ Session-Logging | ✓ | `io/replay.py` |
-| /LF800/ Replay-Format | ✓ | `io/replay.py` |
-| /LF820/ Synthetik-Tests | ✓ | `tests/` |
+```bash
+pytest tests/ -v
+```
+
+**35 Tests** abdeckend:
+- Schmitt-Trigger-Detektor (Tremor, Signal, Doppelpuls, HOLD)
+- Dual-Timescale-Baseline (Gating, MAD-Floor)
+- Kalibrierung (Peak-Picking, Kanal-Ranking, Profil-IO)
+- Scanning (3-Item, Timeout, Cancel-Countdown)
+- Replay (Log + Wiedergabe)
+- Tools (Annotation, Validierung, Batch-Runner)
 
 ## Technik
 

@@ -56,6 +56,10 @@ class SchmittTriggerDetector:
         )
         self._baseline.set_initial(profile.baseline_median, profile.baseline_mad)
 
+        # Hold-Modus
+        self._hold_duration_s = getattr(profile, 'hold_duration_s', 1.0)
+        self._hold_emitted: bool = False
+
         # Zustand
         self._state = DetectorState.IDLE
         self._state_enter_time: float = 0.0
@@ -192,7 +196,21 @@ class SchmittTriggerDetector:
             if not is_above_off:
                 # Signal beendet → CONFIRM
                 self._transition(DetectorState.CONFIRM, now)
-            # Bleibt in HELD solange Signal gehalten wird
+            else:
+                # Prüfe ob Signal lang genug für HOLD-Event gehalten wird
+                held_duration = now - self._rising_start_time
+                if (held_duration >= self._hold_duration_s and
+                        not self._hold_emitted):
+                    # HOLD-Event emittieren (für hold-Muster)
+                    event = SwitchEvent(
+                        source_id="video_switch",
+                        event_type=EventType.HOLD,
+                        timestamp_capture=self._rising_start_time,
+                        confidence=self._compute_confidence(value),
+                        channel_name=self._channel,
+                    )
+                    self._hold_emitted = True
+                    return event
 
         elif self._state == DetectorState.CONFIRM:
             # Sofortige Emission (Bestätigungslogik in temporal/patterns.py)
@@ -224,6 +242,7 @@ class SchmittTriggerDetector:
 
         if new_state == DetectorState.RISING:
             self._rising_start_time = now
+            self._hold_emitted = False
 
         logger.debug(f"Detektor: {old_state.name} → {new_state.name}")
 
