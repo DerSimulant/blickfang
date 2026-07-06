@@ -1,0 +1,81 @@
+# blickfang — Konfiguration (Beispiel)
+# Kopieren nach settings.yaml und anpassen.
+
+# --- Kamera ---
+capture:
+  backend: auto          # auto | dshow (Windows) | v4l2 (Linux) | avfoundation (macOS)
+  device_index: 0
+  resolution: [640, 480]
+  fps: 30
+  disable_autofocus: true
+  fix_exposure: true
+
+# --- Feature-Extraktion ---
+features:
+  model_asset: "face_landmarker_v2_with_blendshapes.task"
+  min_detection_confidence: 0.5
+  min_tracking_confidence: 0.5
+
+# --- Kalibrierung ---
+calibration:
+  signal_count: 10           # Anzahl gewünschter Signalwiederholungen
+  neutral_duration_s: 180    # Ruhe-/Neutralphase in Sekunden (3 min)
+  peak_window_s: 3.0         # Fenster für Peak-Picking
+  validation_signals: 10     # Signale in der Validierungsrunde
+  validation_rest_s: 120     # Ruhezeit in Validierungsrunde (2 min)
+
+# --- Detektion ---
+detection:
+  # Schmitt-Trigger-Parameter
+  hysteresis_factor: 0.3     # Aus-Schwelle = Ein-Schwelle * (1 - hysteresis_factor)
+  hold_time_s: 0.4           # Mindest-Haltezeit in Sekunden
+  refractory_s: 1.0          # Refraktärzeit nach Emission
+
+  # Dual-Timescale-Baseline
+  baseline_slow_window_s: 120.0   # Langsame Baseline (Minuten)
+  baseline_fast_window_s: 5.0     # Schnelle Baseline (Sekunden)
+
+  # Lichtsprung-Veto
+  light_jump_threshold: 0.15      # Relative Helligkeitsänderung
+  light_veto_duration_s: 2.0      # Sperrdauer nach Lichtsprung
+
+# --- Virtueller Schalter ---
+switch:
+  source: video              # video | key
+  key_binding: space         # Taste für key_switch
+
+# --- Zeitliche Muster ---
+patterns:
+  confirmation: single       # single | double | hold
+  double_window_s: 1.5       # Zeitfenster für Doppel-Signal
+  hold_duration_s: 1.0       # Haltezeit für Hold-Muster
+
+# --- Output ---
+output:
+  mode: yesno                # yesno (M1) | scanning (M2+)
+  items:
+    - "JA"
+    - "NEIN"
+    - "PASSE"
+  scan_speed_s: 2.0          # Verweildauer pro Item
+  max_cycles: 3              # Maximale Scan-Zyklen ohne Auswahl
+  cancel_countdown_s: 2.5    # Cancel-Countdown vor Sprachausgabe
+
+# --- TTS ---
+tts:
+  engine: pyttsx3            # pyttsx3 | piper
+  language: de
+  rate: 150                  # Sprechgeschwindigkeit (Wörter/min)
+  piper_model: ""            # Pfad zum Piper-Modell (falls engine=piper)
+
+# --- Logging ---
+logging:
+  enabled: false             # opt-in (Datenschutz, /LN31/)
+  output_dir: "./sessions"
+  format: jsonl              # Session-Log = Replay-Format (/LF800/)
+
+# --- UI ---
+ui:
+  monitor_visible: true      # Live-Monitor anzeigen
+  fullscreen: false
+  font_size: 24
