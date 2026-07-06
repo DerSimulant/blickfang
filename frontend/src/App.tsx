@@ -1,17 +1,26 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import { ModeBar } from './components/ModeBar';
 import { ScanGrid } from './components/ScanGrid';
 import { TextDisplay } from './components/TextDisplay';
 import { StatusFooter } from './components/StatusFooter';
 import { StartScreen } from './components/StartScreen';
+import { CalibrationView } from './components/CalibrationView';
+import { SettingsPanel } from './components/SettingsPanel';
+import { CaregiverDashboard } from './components/CaregiverDashboard';
+
+type View = 'main' | 'calibration' | 'settings' | 'dashboard';
 
 function App() {
   const { state, connected, sendSignal, switchMode } = useWebSocket();
+  const [view, setView] = useState<View>('main');
 
   // Tastatur-Handler: Leertaste/Enter = Signal
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Nicht im Kalibrierungs-/Settings-Modus
+      if (view !== 'main') return;
+
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
         sendSignal();
@@ -26,7 +35,7 @@ function App() {
         }
       }
     },
-    [sendSignal]
+    [sendSignal, view]
   );
 
   useEffect(() => {
@@ -37,6 +46,36 @@ function App() {
   const isIdle = state.mode === 'idle';
   const showTextDisplay = state.mode === 'keyboard';
 
+  // Kalibrierungs-Ansicht
+  if (view === 'calibration') {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <CalibrationView onDone={() => setView('main')} />
+      </div>
+    );
+  }
+
+  // Einstellungen
+  if (view === 'settings') {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <SettingsPanel onClose={() => setView('main')} />
+      </div>
+    );
+  }
+
+  // Betreuer-Dashboard
+  if (view === 'dashboard') {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <CaregiverDashboard
+          wsState={state}
+          onClose={() => setView('main')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       {/* Modus-Leiste (oben) — immer sichtbar wenn verbunden */}
@@ -46,12 +85,20 @@ function App() {
           fatigue={state.fatigue}
           connected={connected}
           onSwitchMode={switchMode}
+          onOpenSettings={() => setView('settings')}
+          onOpenDashboard={() => setView('dashboard')}
+          onOpenCalibration={() => setView('calibration')}
         />
       )}
 
       {/* Hauptinhalt */}
       {connected && isIdle && (
-        <StartScreen onStart={switchMode} />
+        <StartScreen
+          onStart={switchMode}
+          onCalibrate={() => setView('calibration')}
+          onSettings={() => setView('settings')}
+          onDashboard={() => setView('dashboard')}
+        />
       )}
 
       {connected && !isIdle && (

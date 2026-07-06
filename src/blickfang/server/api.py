@@ -32,7 +32,11 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="blickfang", version="0.2.0")
+app = FastAPI(title="blickfang", version="0.3.0")
+
+# Kalibrierungs-Router einbinden
+from blickfang.server.calibration_api import router as calibration_router
+app.include_router(calibration_router)
 
 # CORS für Entwicklung (Vite dev server auf :5173)
 app.add_middleware(
@@ -169,6 +173,16 @@ async def update_config(config: ConfigUpdate):
     if bridge:
         bridge.update_config(config.dict(exclude_none=True))
     return {"status": "ok"}
+
+
+@app.delete("/api/profiles/{name}")
+async def delete_profile(name: str):
+    """Löscht ein Profil."""
+    profiles_dir = Path(__file__).resolve().parents[3] / "config" / "profiles"
+    for path in profiles_dir.glob(f"{name}*.yaml"):
+        path.unlink()
+        return {"status": "ok", "deleted": str(path)}
+    return {"error": "Profil nicht gefunden"}
 
 
 @app.post("/api/signal")

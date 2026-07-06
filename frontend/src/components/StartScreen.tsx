@@ -1,8 +1,11 @@
 interface StartScreenProps {
   onStart: (mode: string) => void;
+  onCalibrate?: () => void;
+  onSettings?: () => void;
+  onDashboard?: () => void;
 }
 
-export function StartScreen({ onStart }: StartScreenProps) {
+export function StartScreen({ onStart, onCalibrate, onSettings, onDashboard }: StartScreenProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-8 animate-fade-in p-8">
       <div className="text-center">
@@ -12,6 +15,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
         </p>
       </div>
 
+      {/* Kommunikations-Modi */}
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg">
         <button
           onClick={() => onStart('phrases')}
@@ -48,6 +52,37 @@ export function StartScreen({ onStart }: StartScreenProps) {
           <span className="text-lg font-bold">Hauptmenü</span>
           <span className="text-sm text-[var(--text-secondary)]">Alle Modi per Scan</span>
         </button>
+      </div>
+
+      {/* Betreuer-Werkzeuge */}
+      <div className="flex gap-3 mt-2">
+        {onCalibrate && (
+          <button
+            onClick={onCalibrate}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] rounded-lg border border-white/10 hover:border-[var(--accent-highlight)] transition-colors text-sm"
+          >
+            <span>🎯</span>
+            <span>Kalibrierung</span>
+          </button>
+        )}
+        {onDashboard && (
+          <button
+            onClick={onDashboard}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] rounded-lg border border-white/10 hover:border-[var(--accent-highlight)] transition-colors text-sm"
+          >
+            <span>📊</span>
+            <span>Dashboard</span>
+          </button>
+        )}
+        {onSettings && (
+          <button
+            onClick={onSettings}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] rounded-lg border border-white/10 hover:border-[var(--accent-highlight)] transition-colors text-sm"
+          >
+            <span>⚙️</span>
+            <span>Einstellungen</span>
+          </button>
+        )}
       </div>
 
       <div className="text-center text-sm text-white/30 mt-4">

@@ -272,6 +272,39 @@ class QuickTrim:
         return self._profile
 
 
+def load_latest_profile(
+    person_name: str,
+    directory: Optional[Path] = None,
+) -> Optional[Dict]:
+    """Lädt das neueste Profil einer Person als Dict.
+
+    Args:
+        person_name: Name der Person.
+        directory: Profilverzeichnis.
+
+    Returns:
+        Dict mit Profil-Parametern oder None.
+    """
+    profiles = list_profiles(person_name, directory)
+    if not profiles:
+        return None
+
+    profile = CalibrationProfile.load(profiles[0])
+    return {
+        "channel": profile.channel_name,
+        "direction": profile.channel_direction,
+        "threshold_delta": profile.threshold_delta,
+        "hysteresis": profile.hysteresis_factor,
+        "hold_time_s": profile.hold_time_s,
+        "refractory_s": profile.refractory_s,
+        "fast_alpha": 0.02,
+        "slow_alpha": 0.002,
+        "mad_floor": profile.mad_floor,
+        "baseline_median": profile.baseline_median,
+        "baseline_mad": profile.baseline_mad,
+    }
+
+
 def list_profiles(
     person_name: Optional[str] = None,
     directory: Optional[Path] = None,
