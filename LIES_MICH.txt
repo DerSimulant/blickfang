@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════
+                    blickfang — Schnellstart
+    Kommunikationshilfe für Menschen mit schwerer Behinderung
+═══════════════════════════════════════════════════════════════
+
+VORAUSSETZUNGEN:
+  • Windows 10/11
+  • Python 3.10+ (https://www.python.org/downloads/)
+    → Bei Installation "Add Python to PATH" ankreuzen!
+  • Webcam (USB oder eingebaut)
+  • Lautsprecher (für Sprachausgabe)
+
+───────────────────────────────────────────────────────────────
+REIHENFOLGE (Doppelklick auf die BAT-Dateien):
+───────────────────────────────────────────────────────────────
+
+  1. INSTALL.bat        Einmalig: Installiert alles automatisch
+  
+  2. SELFTEST.bat       Prüft ob alles funktioniert
+  
+  3. AUFNEHMEN.bat      Videos der Person aufnehmen
+                        (Signal, Ruhe, Unruhe — je nach Situation)
+  
+  4. ANNOTIEREN.bat     (Optional) Aufnahmen mit Labels versehen
+  
+  5. KALIBRIEREN.bat    Findet das beste Signal der Person
+  
+  6. START.bat          ★ KOMMUNIKATION STARTEN ★
+                        (JA / NEIN / PASSE mit Sprachausgabe)
+
+───────────────────────────────────────────────────────────────
+WEITERE DATEIEN:
+───────────────────────────────────────────────────────────────
+
+  VALIDIEREN.bat        Prüft wie gut das Profil funktioniert
+  UPDATE.bat            Aktualisiert auf neueste Version
+
+───────────────────────────────────────────────────────────────
+TIPPS:
+───────────────────────────────────────────────────────────────
+
+  • Für den ersten Test: START.bat → Option "Nur mit Tastatur"
+    (funktioniert ohne Kamera, Leertaste = Signal)
+    
+  • Aufnahmen werden im Ordner "recordings/" gespeichert
+  
+  • Profile werden im Ordner "config/profiles/" gespeichert
+  
+  • Bei Problemen: SELFTEST.bat zeigt was fehlt
+
+  • Für Updates: UPDATE.bat oder INSTALL.bat erneut ausführen
+
+═══════════════════════════════════════════════════════════════
