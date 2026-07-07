@@ -9,8 +9,10 @@ import { CalibrationView } from './components/CalibrationView';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CaregiverDashboard } from './components/CaregiverDashboard';
 import { ErrorOverlay } from './components/ErrorOverlay';
+import { SentenceBuilderView } from './components/SentenceBuilderView';
+import { DictionaryView } from './components/DictionaryView';
 
-type View = 'main' | 'calibration' | 'settings' | 'dashboard';
+type View = 'main' | 'calibration' | 'settings' | 'dashboard' | 'sentence_builder' | 'dictionary';
 
 function App() {
   const { state, connected, sendSignal, switchMode } = useWebSocket();
@@ -19,12 +21,15 @@ function App() {
   // Tastatur-Handler: Leertaste/Enter = Signal
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // Nicht im Kalibrierungs-/Settings-Modus
-      if (view !== 'main') return;
+      // Nicht im Kalibrierungs-/Settings-/Dictionary-Modus
+      if (view !== 'main' && view !== 'sentence_builder') return;
 
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        sendSignal();
+        if (view === 'main') {
+          sendSignal();
+        }
+        // SentenceBuilderView hat eigenen Tastatur-Handler
       }
       // F11 für Vollbild
       if (e.code === 'F11') {
@@ -77,6 +82,24 @@ function App() {
     );
   }
 
+  // Satz-Builder
+  if (view === 'sentence_builder') {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <SentenceBuilderView onSendSignal={sendSignal} />
+      </div>
+    );
+  }
+
+  // Wörterbuch
+  if (view === 'dictionary') {
+    return (
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
+        <DictionaryView onClose={() => setView('main')} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       {/* Modus-Leiste (oben) — immer sichtbar wenn verbunden */}
@@ -89,6 +112,8 @@ function App() {
           onOpenSettings={() => setView('settings')}
           onOpenDashboard={() => setView('dashboard')}
           onOpenCalibration={() => setView('calibration')}
+          onOpenSentenceBuilder={() => setView('sentence_builder')}
+          onOpenDictionary={() => setView('dictionary')}
         />
       )}
 
@@ -99,6 +124,8 @@ function App() {
           onCalibrate={() => setView('calibration')}
           onSettings={() => setView('settings')}
           onDashboard={() => setView('dashboard')}
+          onSentenceBuilder={() => setView('sentence_builder')}
+          onDictionary={() => setView('dictionary')}
         />
       )}
 

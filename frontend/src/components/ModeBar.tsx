@@ -8,6 +8,8 @@ interface ModeBarProps {
   onOpenSettings?: () => void;
   onOpenDashboard?: () => void;
   onOpenCalibration?: () => void;
+  onOpenSentenceBuilder?: () => void;
+  onOpenDictionary?: () => void;
 }
 
 const MODE_LABELS: Record<string, { label: string; icon: string }> = {
@@ -33,6 +35,8 @@ export function ModeBar({
   onOpenSettings,
   onOpenDashboard,
   onOpenCalibration,
+  onOpenSentenceBuilder,
+  onOpenDictionary,
 }: ModeBarProps) {
   const modeInfo = MODE_LABELS[mode] || MODE_LABELS.idle;
 
@@ -59,6 +63,16 @@ export function ModeBar({
             {MODE_LABELS[m].icon}
           </button>
         ))}
+        {/* Satz-Builder Button */}
+        {onOpenSentenceBuilder && (
+          <button
+            onClick={onOpenSentenceBuilder}
+            className="px-2 py-1 rounded text-xs font-medium transition-colors bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+            title="Satz-Builder"
+          >
+            📝
+          </button>
+        )}
       </div>
 
       {/* Rechte Seite: Tools + Status */}
@@ -79,6 +93,15 @@ export function ModeBar({
               title="Betreuer-Dashboard"
             >
               📊
+            </button>
+          )}
+          {onOpenDictionary && (
+            <button
+              onClick={onOpenDictionary}
+              className="px-2 py-1 bg-white/5 rounded text-xs hover:bg-white/10"
+              title="Wörterbuch"
+            >
+              📖
             </button>
           )}
           {onOpenCalibration && (

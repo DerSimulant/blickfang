@@ -11,9 +11,11 @@ interface StartScreenProps {
   onCalibrate?: () => void;
   onSettings?: () => void;
   onDashboard?: () => void;
+  onSentenceBuilder?: () => void;
+  onDictionary?: () => void;
 }
 
-export function StartScreen({ onStart, onCalibrate, onSettings, onDashboard }: StartScreenProps) {
+export function StartScreen({ onStart, onCalibrate, onSettings, onDashboard, onSentenceBuilder, onDictionary }: StartScreenProps) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState('');
   const [useCamera, setUseCamera] = useState(false);
@@ -186,6 +188,17 @@ export function StartScreen({ onStart, onCalibrate, onSettings, onDashboard }: S
           <span className="text-base font-bold">Hauptmenü</span>
           <span className="text-xs text-[var(--text-secondary)]">Alle Modi per Scan</span>
         </button>
+
+        {onSentenceBuilder && (
+          <button
+            onClick={onSentenceBuilder}
+            className="flex flex-col items-center gap-2 p-6 bg-[var(--bg-card)] rounded-2xl border-2 border-transparent hover:border-[var(--accent-highlight)] transition-all duration-200"
+          >
+            <span className="text-3xl">📝</span>
+            <span className="text-base font-bold">Satz-Builder</span>
+            <span className="text-xs text-[var(--text-secondary)]">Sätze zusammensetzen</span>
+          </button>
+        )}
       </div>
 
       {/* Betreuer-Werkzeuge */}
@@ -215,6 +228,15 @@ export function StartScreen({ onStart, onCalibrate, onSettings, onDashboard }: S
           >
             <span>⚙️</span>
             <span>Einstellungen</span>
+          </button>
+        )}
+        {onDictionary && (
+          <button
+            onClick={onDictionary}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] rounded-lg border border-white/10 hover:border-[var(--accent-highlight)] transition-colors text-sm"
+          >
+            <span>📖</span>
+            <span>Wörterbuch</span>
           </button>
         )}
       </div>

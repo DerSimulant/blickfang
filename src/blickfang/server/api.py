@@ -37,8 +37,12 @@ app = FastAPI(title="blickfang", version="0.3.0")
 # Router einbinden
 from blickfang.server.calibration_api import router as calibration_router
 from blickfang.server.camera_api import router as camera_router
+from blickfang.server.m3_api import router as m3_router
+from blickfang.server.protocol_api import router as protocol_router
 app.include_router(calibration_router)
 app.include_router(camera_router)
+app.include_router(m3_router)
+app.include_router(protocol_router)
 
 # CORS für Entwicklung (Vite dev server auf :5173)
 app.add_middleware(
