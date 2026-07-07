@@ -34,9 +34,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="blickfang", version="0.3.0")
 
-# Kalibrierungs-Router einbinden
+# Router einbinden
 from blickfang.server.calibration_api import router as calibration_router
+from blickfang.server.camera_api import router as camera_router
 app.include_router(calibration_router)
+app.include_router(camera_router)
 
 # CORS für Entwicklung (Vite dev server auf :5173)
 app.add_middleware(
@@ -222,6 +224,70 @@ async def stop_communication():
     bridge = get_bridge()
     if bridge:
         bridge.stop()
+    return {"status": "ok"}
+
+
+
+# ─── Session-Export ──────────────────────────────────────────────────────
+
+# Kommunikations-Verlauf speichern
+_session_history: List[Dict[str, Any]] = []
+
+
+def log_communication(text: str, mode: str) -> None:
+    """Wird von der Bridge aufgerufen um Kommunikation zu protokollieren."""
+    _session_history.append({
+        "text": text,
+        "mode": mode,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+    })
+
+
+@app.get("/api/session/history")
+async def get_session_history():
+    """Gibt den Kommunikations-Verlauf zurück."""
+    return _session_history
+
+
+@app.get("/api/session/export")
+async def export_session():
+    """Exportiert den Kommunikations-Verlauf als Textdatei."""
+    from fastapi.responses import Response
+
+    if not _session_history:
+        return {"error": "Kein Verlauf vorhanden"}
+
+    lines_out = []
+    lines_out.append(f"blickfang — Kommunikations-Protokoll")
+    lines_out.append(f"Datum: {time.strftime('%Y-%m-%d')}")
+    lines_out.append(f"Einträge: {len(_session_history)}")
+    lines_out.append("=" * 50)
+    lines_out.append("")
+
+    for entry in _session_history:
+        ts = entry.get('timestamp', '')
+        mode = entry.get('mode', '')
+        text = entry.get('text', '')
+        lines_out.append(f"[{ts}] ({mode}) {text}")
+
+    lines_out.append("")
+    lines_out.append("=" * 50)
+    lines_out.append("Ende des Protokolls")
+
+    content = "\n".join(lines_out)
+    filename = f"blickfang_protokoll_{time.strftime('%Y%m%d_%H%M%S')}.txt"
+
+    return Response(
+        content=content,
+        media_type="text/plain; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.delete("/api/session/history")
+async def clear_session_history():
+    """Löscht den Kommunikations-Verlauf."""
+    _session_history.clear()
     return {"status": "ok"}
 
 

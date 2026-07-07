@@ -188,7 +188,24 @@ export function CaregiverDashboard({ wsState, onClose }: CaregiverDashboardProps
 
       {/* Kommunikations-Verlauf */}
       <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-white/10 flex-1 min-h-[200px]">
-        <h3 className="text-sm text-white/40 mb-3">Kommunikations-Verlauf</h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm text-white/40">Kommunikations-Verlauf</h3>
+          <div className="flex gap-2">
+            <a
+              href="/api/session/export"
+              download
+              className="px-2 py-1 bg-white/10 rounded text-xs hover:bg-white/20"
+            >
+              Exportieren
+            </a>
+            <button
+              onClick={() => { fetch('/api/session/history', { method: 'DELETE' }); }}
+              className="px-2 py-1 bg-white/10 rounded text-xs hover:bg-white/20 text-red-300"
+            >
+              Löschen
+            </button>
+          </div>
+        </div>
         {wsState?.text_buffer ? (
           <div className="mb-3 p-3 bg-[var(--accent-highlight)]/10 border border-[var(--accent-highlight)]/30 rounded-lg">
             <span className="text-xs text-white/40">Aktueller Text:</span>

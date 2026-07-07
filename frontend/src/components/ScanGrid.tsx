@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import type { EngineState } from '../types/protocol';
+import { useAudioFeedback } from '../hooks/useAudioFeedback';
 
 interface ScanGridProps {
   state: EngineState;
@@ -6,6 +8,29 @@ interface ScanGridProps {
 
 export function ScanGrid({ state }: ScanGridProps) {
   const { layout, phase, current_row, current_col } = state;
+  const { play } = useAudioFeedback(true);
+  const prevRow = useRef(current_row);
+  const prevCol = useRef(current_col);
+  const prevPhase = useRef(phase);
+
+  // Akustisches Feedback bei Scan-Schritt-Wechsel
+  useEffect(() => {
+    if (phase === 'row_scan' && current_row !== prevRow.current) {
+      play('tick');
+    } else if (phase === 'col_scan' && current_col !== prevCol.current) {
+      play('tick');
+    } else if (phase === 'confirm' && prevPhase.current !== 'confirm') {
+      play('select');
+    } else if (phase === 'selected' && prevPhase.current !== 'selected') {
+      play('confirm');
+    } else if (phase === 'idle' && prevPhase.current === 'confirm') {
+      play('cancel');
+    }
+
+    prevRow.current = current_row;
+    prevCol.current = current_col;
+    prevPhase.current = phase;
+  }, [phase, current_row, current_col, play]);
 
   if (!layout || !layout.rows || layout.rows.length === 0) {
     return (

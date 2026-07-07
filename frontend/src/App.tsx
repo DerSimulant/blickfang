@@ -8,6 +8,7 @@ import { StartScreen } from './components/StartScreen';
 import { CalibrationView } from './components/CalibrationView';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CaregiverDashboard } from './components/CaregiverDashboard';
+import { ErrorOverlay } from './components/ErrorOverlay';
 
 type View = 'main' | 'calibration' | 'settings' | 'dashboard';
 
@@ -117,6 +118,13 @@ function App() {
           <StatusFooter phase={state.phase} confirmProgress={state.confirm_progress} />
         </>
       )}
+
+      {/* Fehler-Meldungen */}
+      <ErrorOverlay
+        connected={connected}
+        cameraActive={false}
+        faceDetected={false}
+      />
 
       {/* Nicht verbunden — Overlay */}
       {!connected && (
