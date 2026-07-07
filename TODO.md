@@ -42,10 +42,10 @@
 
 ## Meilenstein M3 — Erweitertes Vokabular & Satz-Builder
 
-- [ ] Satz-Builder (Subjekt → Verb → Objekt)
-- [ ] Kontextabhängige Wortvorschläge (lernt aus Nutzung)
-- [ ] Persönliches Wörterbuch (häufig genutzte Wörter priorisieren)
-- [ ] Textdatei-Export (gesamter Tagesverlauf)
+- [x] Satz-Builder (Subjekt → Verb → Objekt) mit Verb-Konjugation
+- [x] Kontextabhängige Wortvorschläge (lernt aus Nutzung, Bigram-Modell)
+- [x] Persönliches Wörterbuch (Kategorien, Favoriten, Import/Export)
+- [x] Textdatei-Export (gesamter Tagesverlauf, formatiert für Therapeuten)
 - [ ] Mehrsprachige Unterstützung (Englisch, weitere Sprachen)
 - [ ] Emoji-Unterstützung für emotionale Kommunikation
 
@@ -128,4 +128,4 @@
 - Kamera-Auswahl bei mehreren USB-Kameras nicht immer zuverlässig
 - MediaPipe benötigt mindestens 640x480 Auflösung
 - Validierungsrunde in Kalibrierung noch nicht vollständig implementiert
-- Wortvorschläge basieren auf statischer Frequenzliste (noch kein Lernen)
+- Wortvorschläge basieren auf Bigram-Modell (lernt mit Nutzung)
